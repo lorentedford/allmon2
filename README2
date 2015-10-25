@@ -89,6 +89,7 @@ write = all,system,call,log,verbose,command,agent,user,config
 
 Now that we are back to commandline cd /var/www/allmon
 cp allmon.ini.txt allmon.ini.php
+cp controlpanel.ini.txt controlpanel.ini.php
 
 Now edit allmon.ini.php
 nano allmon.ini.php
