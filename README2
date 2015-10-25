@@ -1,0 +1,113 @@
+To install allmon 
+make sure you have sudo privilages first..
+sudo su ie etc..
+Some of the below may not be needed yet.
+apt-get install apache2 php5 libapache2-mod-php5 php5-mcrypt
+
+After installing apache
+nano /etc/apache2/sites-enabled/000-default.conf
+file may be labeled differently if so cd /etc/apache2/sites-enabled
+ls # to display the files in the folder
+I use nano to edit files example nano default.conf
+the file should look similar to this..
+
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+Edit the above to match the folder where you plan to put your allmon installation.
+example /var/www/almon
+
+crtl x to save and exit
+
+Now you need to change directories back to your public folder.
+cd /var/www/
+ls
+chmod 755 -R ./*
+This allows public permission for the site.
+if you put your files in /allmon cd to /var/www/allmon
+Make sure you edit your password fields in login.php
+Here is an example of the top half of the file..
+Where PASSWORD1 and PASSWORD2 is please change these to reflect the password you wish to use.
+
+<?php
+session_start();
+
+$oun = $_POST['user'];
+$opw = $_POST['passwd'];
+
+if (($oun=='admin') AND (($opw=='PASSWORD1') OR ($opw=='PASSWORD2'))) {
+    print "Login succeeded.";
+    $_SESSION['loggedin'] = true;
+} else {
+    print "Sorry, login failed.";
+die;
+
+
+
+Now you need to make sure asterisk will talk with your allmon page.
+cd /etc/asterisk/
+nano manager.conf
+
+Where it says this.
+
+[general]
+displaysystemname = yes
+enabled = yes
+;webenabled = yes
+port = 5038
+
+Make it say this
+
+[general]
+displaysystemname = yes
+enabled = yes
+webenabled = yes
+port = 5038
+
+Adjust the below to how ever you need to configure your system..
+
+This is a rough sample of how mine looks with the 
+exception of password and bindaddr= either ip address or 0.0.0.0 if not local
+
+bindaddr = 127.0.0.1   ; Local interface only! 
+displayconnects = yes
+;
+; Add a Unix epoch timestamp to events (not action responses)
+;
+timestampevents = yes
+
+[admin]
+secret = PutaPasswordHere
+read = all,system,call,log,verbose,command,agent,user,config
+write = all,system,call,log,verbose,command,agent,user,config
+
+#ctrl x to save and exit
+
+Now that we are back to commandline cd /var/www/allmon
+cp allmon.ini.txt allmon.ini.php
+
+Now edit allmon.ini.php
+nano allmon.ini.php
+Match up the infromation to your asterisk installation then ctrl x to exit and save
+
+
+You need to make astdb.php +rwx so this is the command to do this
+chmod +rwx ./astdb.php
+
+generally i run it the first time manually by typing 
+./astdb.php
+
+if you ls -l 
+you should see a new txt file that the above command populated.
+
+I generally run this every 30 minutes in crontab -e
+Generally i use option 1 nano to edit files while in crontab -e
+it will look similar to this
+*/30 * * * * ./var/www/allmon/astdb.php
+
+#ctrl x to save
+hope this helps with the installation of allmon.
